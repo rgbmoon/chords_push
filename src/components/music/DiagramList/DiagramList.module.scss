@@ -1,0 +1,50 @@
+@use "tokens" as *;
+
+// Схемы встают в несколько колонок, когда есть место. Ширина схемы — между
+// --card-min и --card-max; потолок висит на самой схеме, а не в minmax():
+// иначе auto-fit посчитал бы колонки по нему и схлопнул всё в одну.
+.list {
+  --card-min: #{$card-min};
+  --card-max: #{$card-max};
+  display: grid;
+  gap: 8px;
+  align-items: start;
+  justify-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min)), 1fr));
+
+  > * {
+    width: 100%;
+    max-width: var(--card-max);
+  }
+}
+
+.roomy {
+  gap: clamp(14px, 1.8vw, 26px);
+}
+
+// в колонке на телефоне — лента с горизонтальной прокруткой
+.strip {
+  @include mobile {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 $page-pad-x 10px;
+    gap: 10px;
+    @include thin-scrollbar;
+
+    > * {
+      flex: 0 0 min(88vw, var(--card-min));
+      scroll-snap-align: start;
+    }
+  }
+
+  @media print {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    > * {
+      break-inside: avoid;
+    }
+  }
+}

@@ -1,0 +1,107 @@
+// Дизайн-токены: цвета интерфейса, палитра пэдов, пропорции сетки.
+// Подключаются в любом модуле: @use "tokens" as *;
+@use "sass:list";
+@use "sass:map";
+@use "sass:math";
+
+// --- интерфейс ---------------------------------------------------------------
+$bg: #080a09;
+$panel: #121715;
+$panel-deep: #0f1412;
+$line: #1f2724;
+$fg: #e9efeb;
+$muted: #8d9a94;
+$dim: #5f6b66;
+$control: #1b2320;
+$field: #0d1211;
+$scrollbar: #2b3733;
+
+$font: -apple-system, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+$mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+$mobile: 900px;
+$gutter: clamp(18px, 2.2vw, 34px);
+$page-pad-x: clamp(12px, 3vw, 36px);
+
+// --- палитра пэдов: снята попиксельно с фотографии Push ------------------------
+// stops — радиальный градиент от центра к краю, label — цвет подписи
+$pad-palette: (
+  // нота C — тоника раскраски сетки (оранжевая на железе)
+  tonic: (stops: (#fc9650, #e59060, #b07d68, #8b7469, #5a5b55), label: #2a1405),
+  // нота входит в гамму C major
+  scale: (stops: (#f2eaf9, #d8d4e2, #aeacb0, #919091, #4d524e), label: #22252a),
+  // нота вне гаммы — пэд не светится
+  off: (stops: (#606a66, #606a66, #5f6a66, #5c6663, #575d59), label: #aab3af),
+  // рут аккорда — всегда зелёный, где бы ни стоял
+  root: (stops: (#7ff0a8, #4fd98a, #33b871, #258f58, #0d5232), label: #04240f),
+  // остальные ноты аккорда
+  chord: (stops: (#8fdcff, #5cc4f2, #3ea0cc, #2d7ea6, #1d4a63), label: #04212e),
+  // нота, добавленная руками, — В АККОРД НЕ ВХОДИТ: фиолетовый = «это я сам»
+  extra: (stops: (#e8ccff, #cea4f7, #ac7fe2, #8a5cc6, #4b2f74), label: #1d0d33)
+);
+
+@function pad-stop($name, $i) {
+  @return list.nth(map.get(map.get($pad-palette, $name), stops), $i);
+}
+
+@function pad-label($name) {
+  @return map.get(map.get($pad-palette, $name), label);
+}
+
+@function pad-gradient($name) {
+  $stops: map.get(map.get($pad-palette, $name), stops);
+  $body: ();
+  @for $i from 1 through list.length($stops) {
+    $body: list.append($body, list.nth($stops, $i) math.percentage(math.div($i - 1, list.length($stops) - 1)), comma);
+  }
+  @return radial-gradient(ellipse 72% 72% at 50% 50%, $body);
+}
+
+$tone: pad-stop(chord, 2); // акцент интерфейса — голубой аккорда
+$root: pad-stop(root, 2);
+$extra: pad-stop(extra, 2);
+$extra-edge: #e0c2ff;
+$ghost-opacity: 0.4;
+
+// --- пропорции сетки (измерены со скриншота) -----------------------------------
+$pad-w: 69;
+$pad-h: 50;
+$pad-gap-x: 5.2;
+$pad-gap-y: 5.5;
+$pad-radius: 8;
+$grid-margin: 14;
+$grid-w: $grid-margin * 2 + 8 * $pad-w + 7 * $pad-gap-x;
+
+// Ширина схемы. Пол держит подписи читаемыми: ниже 315 у «Gb b13» подпись
+// упирается в край пэда. Потолок нужен не меньше пола: без него одинокая колонка
+// растягивает схему на весь сайдбар — и следующий ряд перестаёт влезать в экран.
+$card-min: 315px;
+$card-max: 330px;
+
+// --- миксины ------------------------------------------------------------------
+@mixin mobile {
+  @media (max-width: $mobile) {
+    @content;
+  }
+}
+
+@mixin thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: $scrollbar transparent;
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $scrollbar;
+    border-radius: 8px;
+  }
+}
+
+@mixin section-heading {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: $muted;
+  font-weight: 600;
+}

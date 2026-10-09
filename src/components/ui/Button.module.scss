@@ -1,0 +1,50 @@
+@use "tokens" as *;
+
+.button {
+  display: inline-block;
+  background: $control;
+  color: $fg;
+  border: 1px solid $line;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.3;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: $tone;
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+    border-color: $line;
+    color: $muted;
+  }
+}
+
+.primary {
+  background: $tone;
+  border-color: $tone;
+  color: pad-label(chord);
+  font-weight: 600;
+
+  &:hover {
+    color: pad-label(chord);
+    filter: brightness(1.08);
+  }
+
+  &:disabled {
+    background: $control;
+    filter: none;
+  }
+}
+
+.small {
+  padding: 3px 8px;
+  font-size: 12px;
+}

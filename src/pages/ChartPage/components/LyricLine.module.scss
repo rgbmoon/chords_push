@@ -1,0 +1,49 @@
+@use "tokens" as *;
+
+.line {
+  margin: 0 0 4px;
+  font-size: var(--lyric-size);
+  line-height: 1.35;
+}
+
+.chordsOnly {
+  margin-bottom: 10px;
+}
+
+.blank {
+  height: 11px;
+}
+
+.piece {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.chord {
+  display: block;
+  color: $root;
+  font-weight: 700;
+  font-size: 0.82em;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  padding-right: 0.7em;
+  white-space: nowrap;
+  font-feature-settings: "tnum";
+
+  // проигрыши и интро — бледные: схем по ним нет
+  .chordsOnly &,
+  [data-instrumental] & {
+    color: $dim;
+  }
+
+  // нет в таблице: виден в тексте, но схемы не получает
+  &[data-unknown] {
+    color: $extra;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+}
+
+.text {
+  white-space: pre-wrap;
+}

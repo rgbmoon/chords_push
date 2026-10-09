@@ -1,0 +1,13 @@
+@use "tokens" as *;
+
+.empty {
+  color: $dim;
+  font-size: 13.5px;
+  border: 1px dashed $line;
+  border-radius: 12px;
+  padding: 16px 18px;
+
+  a {
+    color: $tone;
+  }
+}

@@ -1,0 +1,21 @@
+@use "tokens" as *;
+
+.field {
+  background: $field;
+  color: $fg;
+  border: 1px solid $line;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 13px;
+  min-width: 0;
+
+  &:focus {
+    outline: none;
+    border-color: $tone;
+  }
+
+  &::placeholder {
+    color: $dim;
+  }
+}

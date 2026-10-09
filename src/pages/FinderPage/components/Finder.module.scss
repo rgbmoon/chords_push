@@ -1,0 +1,35 @@
+@use "tokens" as *;
+
+.main {
+  padding: 14px clamp(12px, 2vw, 22px) 24px $page-pad-x;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+
+  @include mobile {
+    padding-bottom: 16px;
+  }
+}
+
+// Сетка тут одна и она главная. Ширину ограничивают и колонка, и высота окна:
+// 1.343 — пропорция сетки 8×8 при пэде 69×50, 300px — шапка и разбор под сеткой.
+.grid {
+  width: 100%;
+  max-width: min(100%, calc((100dvh - 300px) * 1.343));
+
+  @include mobile {
+    max-width: 100%;
+  }
+}
+
+.aside {
+  padding: 12px clamp(10px, 1.4vw, 20px) 24px clamp(10px, 1vw, 14px);
+
+  @include mobile {
+    padding: 12px 0 24px;
+  }
+}
+
+.name {
+  min-width: 180px;
+}

@@ -1,0 +1,15 @@
+@use "tokens" as *;
+
+.text {
+  font-size: 13.5px;
+  color: $muted;
+  margin: 0 0 10px;
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}

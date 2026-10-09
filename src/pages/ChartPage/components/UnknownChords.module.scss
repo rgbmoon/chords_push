@@ -1,0 +1,16 @@
+@use "tokens" as *;
+
+.warning {
+  color: $extra;
+  font-size: 12.5px;
+  margin: 0 0 10px;
+  line-height: 1.5;
+
+  b {
+    color: $extra;
+  }
+
+  a {
+    color: $tone;
+  }
+}

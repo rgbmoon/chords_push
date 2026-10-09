@@ -1,0 +1,41 @@
+@use "tokens" as *;
+
+// обычная страница: листается целиком
+.scroll {
+  min-height: 100dvh;
+}
+
+// экран: шапка стоит намертво, а прокручиваются области внутри
+.fixed {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  @media print {
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+}
+
+// на телефоне экран превращается в обычную страницу
+.scrollOnMobile {
+  @include mobile {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px $page-pad-x 70px;
+}
+
+.wide {
+  max-width: 1700px;
+  padding-top: 20px;
+  padding-bottom: 72px;
+}

@@ -1,0 +1,60 @@
+@use "tokens" as *;
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12.5px;
+  color: $muted;
+  margin: 0 0 9px;
+  min-height: 26px;
+
+  b {
+    color: $fg;
+    font-weight: 600;
+  }
+
+  @include mobile {
+    padding: 0 $page-pad-x;
+  }
+}
+
+.empty {
+  color: $dim;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 280px;
+  margin: 0;
+
+  @include mobile {
+    max-width: none;
+    padding: 0 $page-pad-x;
+  }
+}
+
+// карточка кликается целиком: клик возвращает аккорд на большую сетку
+.card {
+  cursor: pointer;
+
+  &:hover {
+    outline: 1px solid $scrollbar;
+  }
+
+  &[aria-current="true"] {
+    outline: 1px solid $tone;
+  }
+
+  &[data-added] {
+    animation: added 0.55s ease-out;
+  }
+
+  &[data-dragging] {
+    opacity: 0.35;
+  }
+}
+
+@keyframes added {
+  from {
+    background: #16241d;
+  }
+}

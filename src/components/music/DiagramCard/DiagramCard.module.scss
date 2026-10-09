@@ -1,0 +1,105 @@
+@use "tokens" as *;
+
+.card {
+  background: $bg;
+  border-radius: 11px;
+  padding: 7px;
+  min-width: 0;
+}
+
+// Подпись НАД сеткой одной строкой: имя аккорда с нотами слева, ступени справа.
+// Обе половины умеют сжиматься и переноситься — иначе десяток своих нот
+// распирает строку, а с ней и карточку.
+.caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 10px;
+  margin-bottom: 6px;
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.symbol {
+  font-size: 14px;
+  font-weight: 700;
+  color: #eef2ef;
+  letter-spacing: -0.01em;
+  flex: 0 0 auto;
+
+  // изменённая схема — маленькая точка у имени, а не рамка на всю карточку
+  .edited &::after {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: $root;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+}
+
+.notes {
+  font-size: 11.5px;
+  color: #8b9691;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.side {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  justify-content: flex-end;
+  min-width: 0;
+  flex: 0 1 auto;
+  font-size: 11.5px;
+  color: #8b9691;
+}
+
+.degrees {
+  min-width: 0;
+
+  b {
+    color: $fg;
+    font-weight: 600;
+  }
+}
+
+.extra {
+  color: $extra-edge;
+  font-weight: 600;
+}
+
+// мелкая кнопка на карточке: ⟲, ×
+.cardButton {
+  background: $control;
+  color: #cdd6d1;
+  border: 1px solid #26312d;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 6px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $tone;
+    color: #eef2ef;
+  }
+
+  @media print {
+    display: none;
+  }
+}

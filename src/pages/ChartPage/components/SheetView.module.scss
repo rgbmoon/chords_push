@@ -1,0 +1,81 @@
+@use "tokens" as *;
+
+.sheet {
+  padding: 18px clamp(12px, 2vw, 22px) 40px $page-pad-x;
+}
+
+.aside {
+  padding: 12px clamp(10px, 1.4vw, 20px) 12px clamp(10px, 1vw, 14px);
+
+  @include mobile {
+    padding: 10px 0 0;
+  }
+}
+
+.section {
+  margin: 0 0 26px;
+
+  @media print {
+    break-inside: avoid;
+  }
+}
+
+.sectionTitle {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: $muted;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: $line;
+  }
+
+  [data-instrumental] & {
+    color: $dim;
+  }
+}
+
+.footer {
+  margin-top: 30px;
+  padding-top: 16px;
+  border-top: 1px solid $line;
+  color: $muted;
+  font-size: 12.5px;
+  line-height: 1.7;
+
+  a {
+    color: $tone;
+  }
+
+  b {
+    color: $fg;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  @media print {
+    display: none;
+  }
+}
+
+.legend {
+  margin: 0 0 12px;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0 0 12px;
+}

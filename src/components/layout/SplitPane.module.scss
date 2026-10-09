@@ -1,0 +1,111 @@
+@use "tokens" as *;
+
+.split {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, var(--split, 50%)) $gutter minmax(0, 1fr);
+}
+
+// обе колонки листаются сами по себе; паддинги ставит содержимое
+.pane {
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+  min-height: 0;
+  overscroll-behavior: contain;
+  @include thin-scrollbar;
+}
+
+.gutter {
+  position: relative;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    margin-left: -0.5px;
+    background: $line;
+  }
+
+  &:focus-visible::before {
+    background: $tone;
+  }
+}
+
+.handle {
+  position: relative;
+  display: block;
+  width: 5px;
+  height: 52px;
+  border-radius: 4px;
+  background: #26312d;
+  transition: background 0.15s;
+
+  .gutter:hover &,
+  .gutter:focus-visible &,
+  .dragging & {
+    background: $tone;
+  }
+}
+
+@include mobile {
+  .split {
+    grid-template-columns: 1fr;
+  }
+
+  .gutter {
+    display: none;
+  }
+
+  // песня: схемы лентой наверху, текст под ними со своим скроллом
+  .asideFirst {
+    grid-template-rows: auto minmax(0, 1fr);
+
+    .aside {
+      order: -1;
+      overflow: visible;
+      border-bottom: 1px solid $line;
+    }
+  }
+
+  // рабочая сетка первой, всё листается целиком
+  .stacked {
+    grid-template-rows: auto auto;
+
+    .pane {
+      overflow: visible;
+    }
+
+    .aside {
+      border-top: 1px solid $line;
+    }
+  }
+}
+
+@media print {
+  .split {
+    display: block;
+    max-width: none;
+  }
+
+  .pane {
+    overflow: visible;
+  }
+
+  .gutter {
+    display: none;
+  }
+}

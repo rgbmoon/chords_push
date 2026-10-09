@@ -1,0 +1,169 @@
+@use "sass:math";
+@use "tokens" as *;
+
+// Схема — плотная вещь: их на странице сразу столько, сколько аккордов в песне.
+// Поэтому кегль НЕ привязан к ширине схемы целиком (иначе «сжать схему» значило бы
+// «уменьшить текст»), а только упирается в пол и потолок.
+.frame {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: math.div($pad-gap-y, $grid-w) * 100cqw math.div($pad-gap-x, $grid-w) * 100cqw;
+}
+
+.pad {
+  position: relative;
+  aspect-ratio: math.div($pad-w, $pad-h);
+  border-radius: math.div($pad-radius, $grid-w) * 100cqw;
+  // grid, а не flex: при baseline-выравнивании во flex подпись прилипает к верху пэда
+  display: grid;
+  grid-auto-flow: column;
+  align-content: center;
+  justify-content: center;
+  align-items: baseline;
+  gap: 1.5px;
+  line-height: 1;
+  user-select: none;
+  overflow: hidden;
+
+  &[data-color="tonic"] {
+    background: pad-gradient(tonic);
+    color: pad-label(tonic);
+  }
+  &[data-color="scale"] {
+    background: pad-gradient(scale);
+    color: pad-label(scale);
+  }
+  &[data-color="off"] {
+    background: pad-gradient(off);
+    color: pad-label(off);
+  }
+
+  &[data-role="chord"] {
+    background: pad-gradient(chord);
+    color: pad-label(chord);
+    box-shadow: inset 0 0 0 max(1px, 0.36cqw) rgba(255, 255, 255, 0.9);
+
+    &[data-root] {
+      background: pad-gradient(root);
+      color: pad-label(root);
+    }
+  }
+
+  // бледные — те же ноты на других пэдах: полупрозрачная заливка поверх базового цвета
+  &[data-role="ghost"] {
+    cursor: pointer;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: pad-gradient(chord);
+      opacity: $ghost-opacity;
+    }
+    &[data-root]::after {
+      background: pad-gradient(root);
+    }
+    &:hover::after {
+      opacity: 0.72;
+    }
+  }
+
+  // своя нота: НЕ из аккорда — и цвет не из палитры аккорда, и рамка не белая
+  &[data-role="extra"] {
+    background: pad-gradient(extra);
+    color: pad-label(extra);
+    box-shadow: inset 0 0 0 max(1px, 0.36cqw) $extra-edge;
+  }
+
+  &:focus-visible {
+    outline: 2px solid pad-stop(chord, 1);
+    outline-offset: 1px;
+  }
+
+  @media print {
+    box-shadow: none;
+  }
+}
+
+.name {
+  position: relative;
+  z-index: 1;
+  font-weight: 600;
+  font-size: clamp(14px, 3.1cqw, 15px);
+}
+
+// Ступень стоит СБОКУ от имени: снизу она упиралась в край пэда. Лежит в разметке
+// у всех 64 пэдов, а показывается только у выбранных.
+.degree {
+  display: none;
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  opacity: 0.8;
+  letter-spacing: -0.2px;
+  font-size: clamp(9px, 2.1cqw, 10.5px);
+
+  // трёхсимвольные (bb7, b13, #11) не влезали рядом с двухбуквенным именем
+  &[data-long] {
+    font-size: clamp(8.5px, 1.95cqw, 10px);
+    letter-spacing: -0.35px;
+  }
+
+  .pad[data-role] & {
+    display: block;
+  }
+}
+
+.clickable {
+  cursor: pointer;
+
+  .pad[data-role="chord"] {
+    cursor: default;
+  }
+}
+
+// большая рабочая сетка: кегль растёт вместе с пэдом
+.large {
+  .name {
+    font-size: clamp(13px, 2.9cqw, 23px);
+  }
+  .degree {
+    font-size: clamp(9px, 1.9cqw, 14px);
+    &[data-long] {
+      font-size: clamp(8.5px, 1.75cqw, 12.5px);
+    }
+  }
+}
+
+// любой пэд кликается — и выбранные тоже: клик их снимает
+.free {
+  .pad {
+    cursor: pointer;
+    &:hover {
+      filter: brightness(1.12);
+    }
+  }
+}
+
+// рут выбран — пэд под курсором показывает свою ступень от него
+.hoverDegrees .pad:hover .degree {
+  display: block;
+}
+
+// набрано максимум нот: снять можно, добавить нельзя — это видно по курсору
+.full .pad:not([data-role="chord"], [data-role="extra"]) {
+  cursor: default;
+  &:hover {
+    filter: none;
+  }
+}
+
+.inert .grid {
+  pointer-events: none;
+}

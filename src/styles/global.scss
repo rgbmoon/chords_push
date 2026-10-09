@@ -1,0 +1,45 @@
+@use "tokens" as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: $bg;
+  color: $fg;
+  font: 15px/1.55 $font;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+code {
+  font: 12.5px/1.4 $mono;
+  background: #151b19;
+  border: 1px solid $line;
+  border-radius: 5px;
+  padding: 0 4px;
+  white-space: pre-wrap;
+}
+
+body.dragging {
+  user-select: none;
+  cursor: col-resize;
+}
+
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

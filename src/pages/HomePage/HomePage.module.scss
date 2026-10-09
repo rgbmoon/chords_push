@@ -1,0 +1,20 @@
+@use "tokens" as *;
+
+.section + .section {
+  margin-top: 28px;
+}
+
+.heading {
+  @include section-heading;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.count {
+  text-transform: none;
+  letter-spacing: 0;
+  color: $dim;
+  font-weight: 400;
+}

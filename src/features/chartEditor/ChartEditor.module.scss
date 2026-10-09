@@ -1,0 +1,88 @@
+@use "tokens" as *;
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.source {
+  width: 100%;
+  min-height: clamp(170px, 34vh, 380px);
+  resize: vertical;
+  background: $field;
+  color: $fg;
+  border: 1px solid $line;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: 14px/1.45 $mono;
+  tab-size: 8;
+
+  &:focus {
+    outline: none;
+    border-color: $tone;
+  }
+
+  &::placeholder {
+    color: $dim;
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.field {
+  flex: 1 1 200px;
+}
+
+.info {
+  font-size: 13px;
+  color: $muted;
+  min-height: 20px;
+  line-height: 1.5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+
+  b {
+    color: $fg;
+    font-weight: 600;
+  }
+}
+
+.dim {
+  color: $dim;
+}
+
+.unknown,
+.unknown b {
+  color: $extra;
+}
+
+.help {
+  font-size: 13px;
+  color: $muted;
+  line-height: 1.6;
+  border: 1px solid $line;
+  border-radius: 12px;
+  padding: 8px 14px;
+  background: $panel;
+
+  summary {
+    cursor: pointer;
+    color: $fg;
+  }
+
+  p {
+    margin: 8px 0;
+  }
+
+  b {
+    color: $fg;
+    font-weight: 600;
+  }
+}

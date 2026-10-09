@@ -1,0 +1,100 @@
+@use "tokens" as *;
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.symbol {
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  min-height: 1.05em;
+  word-break: break-word;
+
+  &[data-muted] {
+    color: $dim;
+    font-weight: 400;
+    font-size: 23px;
+    letter-spacing: 0;
+  }
+}
+
+.description {
+  color: $muted;
+  font-size: 13px;
+  margin-top: -4px;
+}
+
+.note {
+  font-size: 13px;
+  color: $muted;
+  min-width: 0;
+  word-break: break-word;
+  min-height: 1.2em;
+
+  b {
+    color: $fg;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.extra {
+  color: $extra;
+  font-weight: 600;
+}
+
+.warning {
+  color: $extra;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.option {
+  background: #151b19;
+  border: 1px solid $line;
+  border-radius: 7px;
+  padding: 4px 9px;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: $muted;
+  cursor: pointer;
+
+  &:hover {
+    color: $fg;
+  }
+
+  &[aria-pressed="true"] {
+    border-color: $tone;
+    color: #fff;
+    background: #16232a;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 3px;
+}
+
+.hint {
+  font-size: 12px;
+  color: $dim;
+  line-height: 1.5;
+  margin: 0;
+
+  b {
+    color: $muted;
+    font-weight: 600;
+  }
+}
