@@ -31,6 +31,7 @@ export function HomePage() {
         <PageHeader
           title="Chords on Push"
           back={null}
+          sticky
           actions={
             <ButtonLink to="/finder" size="small">
               + new collection

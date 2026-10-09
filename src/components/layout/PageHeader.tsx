@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import styles from "./PageHeader.module.scss";
@@ -11,11 +12,20 @@ interface PageHeaderProps {
   actions?: ReactNode;
   /** ссылка назад; null — без неё */
   back?: { to: string; label: string } | null;
+  /** прилипает к верху окна, пока листается страница */
+  sticky?: boolean;
 }
 
-export function PageHeader({ title, subtitle, facts, actions, back = { to: "/", label: "home" } }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  facts,
+  actions,
+  back = { to: "/", label: "home" },
+  sticky,
+}: PageHeaderProps) {
   return (
-    <header className={styles.header}>
+    <header className={clsx(styles.header, sticky && styles.sticky)}>
       <div className={styles.inner}>
         {back && (
           <Link className={styles.back} to={back.to}>

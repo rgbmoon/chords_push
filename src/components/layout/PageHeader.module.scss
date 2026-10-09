@@ -11,6 +11,13 @@
   }
 }
 
+// над плитками и пэдами: у них свои position/z-index
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
 .inner {
   max-width: 1600px;
   margin: 0 auto;
