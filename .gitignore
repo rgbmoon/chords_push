@@ -1,0 +1,10 @@
+# локальные разборы: в songs/ лежат полные тексты чужих песен — в публичный репо не идут
+songs/
+picks/
+_t_songs/
+
+__pycache__/
+.DS_Store
+node_modules/
+dist/
+.netlify/
