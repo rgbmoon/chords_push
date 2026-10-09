@@ -1,4 +1,7 @@
-/** Эталоны, снятые с Python-версии (tools/dump_fixtures.py). Заморожены. */
+/**
+ * Эталоны, снятые с Python-версии (tools/dump_fixtures.py в коммите порта).
+ * Python удалён — эталоны заморожены: TS обязан отвечать так же.
+ */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
