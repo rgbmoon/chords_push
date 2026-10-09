@@ -1,5 +1,9 @@
 @use "tokens" as *;
 
+// Порядок правил значим: у состояний одинаковая специфичность, и побеждает
+// последнее — hover, потом pressed, потом disabled. Неактивная кнопка не
+// реагирует на курсор вовсе: ни цветом, ни рамкой.
+
 .button {
   display: inline-block;
   background: $control;
@@ -19,11 +23,21 @@
     color: #fff;
   }
 
+  // переключатель: S / M / L
+  &[aria-pressed="true"] {
+    background: $tone;
+    border-color: $tone;
+    color: pad-label(chord);
+    font-weight: 600;
+  }
+
   &:disabled {
     opacity: 0.45;
     cursor: default;
+    background: $control;
     border-color: $line;
     color: $muted;
+    filter: none;
   }
 }
 
@@ -34,12 +48,15 @@
   font-weight: 600;
 
   &:hover {
+    border-color: $tone;
     color: pad-label(chord);
     filter: brightness(1.08);
   }
 
   &:disabled {
     background: $control;
+    border-color: $line;
+    color: $muted;
     filter: none;
   }
 }
