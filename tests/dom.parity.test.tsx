@@ -14,7 +14,7 @@ import { Pads } from "../src/components/Pads";
 import { Scheme } from "../src/components/Scheme";
 import { LineView } from "../src/pages/Analysis";
 import { domOrder, schemeModel } from "../src/view/scheme";
-import { fixture } from "./fixtures";
+import { enPgm, fixture } from "./fixtures";
 
 const parse = (html: string) => new DOMParser().parseFromString(`<!doctype html><body>${html}</body>`, "text/html");
 const text = (el: Element | null) => (el ? el.textContent : null);
@@ -61,7 +61,7 @@ describe("схемы", () => {
     models.forEach((m, k) => {
       const want = parse(f.cards_song[k].html).querySelector(".pg")!;
       const got = parse(renderToStaticMarkup(<Scheme model={m} />)).querySelector(".pg")!;
-      expect(cardOf(got), m.title).toEqual(cardOf(want));
+      expect(cardOf(got), m.title).toEqual({ ...cardOf(want), pgm: enPgm(cardOf(want).pgm) });
       expect(padsOf(got).length).toBe(64);
       expect(got.getAttribute("data-key")).toBe(want.getAttribute("data-key"));
       expect(m.data).toEqual(JSON.parse(want.querySelector("script.pgd")!.textContent!));
@@ -80,7 +80,7 @@ describe("схемы", () => {
       const fx = f.cards_seq[k];
       const want = parse(fx.html).querySelector(".pg")!;
       const got = parse(renderToStaticMarkup(<Scheme model={m} />)).querySelector(".pg")!;
-      expect(cardOf(got, false), m.title).toEqual(cardOf(want, false));
+      expect(cardOf(got, false), m.title).toEqual({ ...cardOf(want, false), pgm: enPgm(cardOf(want, false).pgm) });
       // song.py писал в подпись describe() через пробел, а GRID_JS при загрузке
       // сразу переписывал её через « · » — сравниваем с тем, что видел человек
       expect(text(got.querySelector(".sub"))).toBe(fx.describe.split(" ").join(" · "));

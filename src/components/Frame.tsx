@@ -14,7 +14,7 @@ export function Header({
   chips,
   ctl,
   back = "/",
-  backText = "главная",
+  backText = "home",
 }: {
   title: string;
   subtitle?: string;
@@ -136,9 +136,9 @@ export function SplitLayout({ left, right }: { left: ReactNode; right: ReactNode
         tabIndex={0}
         role="separator"
         aria-orientation="vertical"
-        aria-label="ширина колонок"
+        aria-label="column width"
         aria-valuenow={50}
-        title="потяни, чтобы поменять ширину колонок · двойной клик — поровну"
+        title="drag to resize the columns · double-click to split evenly"
       >
         <b />
       </div>
@@ -187,23 +187,23 @@ const st = PALETTE.states;
 
 /** Легенда цветов. Полная — для страницы со схемами, короткая — для песни. */
 export const LEGEND_LONG: [string, string][] = [
-  [st.chord_root.stops[1], "рут аккорда"],
-  [st.chord.stops[1], "остальные ноты"],
-  [st.chord.stops[1] + "66", "бледные — обращения: те же ноты на других пэдах"],
-  [st.extra.stops[1], "выделено руками — в аккорд не входит"],
-  [st.root.stops[0], "нота C — тоника раскраски"],
-  [st.in_key.stops[0], "гамма C major"],
-  [st.off.stops[0], "вне гаммы"],
+  [st.chord_root.stops[1], "chord root"],
+  [st.chord.stops[1], "other notes"],
+  [st.chord.stops[1] + "66", "pale — inversions: the same notes on other pads"],
+  [st.extra.stops[1], "added by hand — not part of the chord"],
+  [st.root.stops[0], "note C — tonic of the grid coloring"],
+  [st.in_key.stops[0], "C major scale"],
+  [st.off.stops[0], "outside the scale"],
 ];
 
 export const LEGEND_SHORT: [string, string][] = [
-  [st.chord_root.stops[1], "рут аккорда"],
-  [st.chord.stops[1], "остальные ноты"],
-  [st.chord.stops[1] + "66", "бледные — обращения"],
-  [st.extra.stops[1], "выделено руками — не из аккорда"],
-  [st.root.stops[0], "нота C"],
-  [st.in_key.stops[0], "гамма C major"],
-  [st.off.stops[0], "вне гаммы"],
+  [st.chord_root.stops[1], "chord root"],
+  [st.chord.stops[1], "other notes"],
+  [st.chord.stops[1] + "66", "pale — inversions"],
+  [st.extra.stops[1], "added by hand — not in the chord"],
+  [st.root.stops[0], "note C"],
+  [st.in_key.stops[0], "C major scale"],
+  [st.off.stops[0], "outside the scale"],
 ];
 
 export function Legend({ items }: { items: readonly [string, string][] }) {

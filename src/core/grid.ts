@@ -38,14 +38,14 @@ export class Grid {
   /** MIDI-нота пэда (по номеру). */
   midi(p: Pad): number {
     if (!(p >= 0 && p < this.rows * this.cols) || !Number.isInteger(p))
-      throw new RangeError(`пэд ${p} вне сетки ${this.rows}x${this.cols}`);
+      throw new RangeError(`pad ${p} is outside the ${this.rows}x${this.cols} grid`);
     return this.baseMidi + ROW_SEMITONES * padRow(p) + padCol(p);
   }
 
   /** MIDI-нота по ряду и колонке. */
   midiRc(r: number, c: number): number {
     if (!(r >= 0 && r < this.rows && c >= 0 && c < this.cols))
-      throw new RangeError(`пэд (${r}, ${c}) вне сетки ${this.rows}x${this.cols}`);
+      throw new RangeError(`pad (${r}, ${c}) is outside the ${this.rows}x${this.cols} grid`);
     return this.baseMidi + ROW_SEMITONES * r + c;
   }
 

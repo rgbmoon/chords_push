@@ -27,7 +27,7 @@ import {
   splitUnits,
 } from "../src/core/sheet";
 import { allPlacements, chordPitches, invert, Overlay, Voicing, voiceChord, voiceProgression } from "../src/core/voicing";
-import { fixture } from "./fixtures";
+import { enIdentify, enInterval, fixture } from "./fixtures";
 
 const G = new Grid();
 const r9 = (x: number | null) => (x === null ? null : Math.round(x * 1e9) / 1e9);
@@ -65,15 +65,19 @@ const voicingOut = (v: Voicing) => ({
 describe("данные", () => {
   const d = fixture("data.json");
   it("таблица аккордов — в том же порядке и с теми же полями", () => {
-    expect([...CHORDS].map(([k, v]) => [k, { intervals: v.intervals, name: v.name, size: v.size, degrees: v.degrees }])).toEqual(
-      d.chords,
-    );
+    // названия типов переведены на английский — сверяются всё, кроме них
+    const strip = ([k, v]: [string, { intervals: number[]; size: number; degrees: string[] }]) => [
+      k,
+      { intervals: v.intervals, size: v.size, degrees: v.degrees },
+    ];
+    expect([...CHORDS].map(strip)).toEqual(d.chords.map(strip));
+    expect([...CHORDS.values()].filter((v) => !/^[a-z0-9 /,-]+$/.test(v.name))).toEqual([]);
   });
   it("алиасы — в том же порядке", () => {
     expect(ALIAS_PAIRS.map(([a, k]) => [a, k])).toEqual(d.chord_aliases);
   });
   it("интервалы, гаммы, палитра, веса", () => {
-    expect([...INTERVALS].map(([n, v]) => [String(n), v])).toEqual(d.intervals);
+    expect([...INTERVALS].map(([n, v]) => [String(n), v.short])).toEqual(d.intervals.map(([n, v]: [string, { short: string }]) => [n, v.short]));
     expect(Object.fromEntries([...SCALES])).toEqual(d.rest.scales);
     expect(PALETTE).toEqual(d.rest.palette);
     const strip = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).filter(([k]) => !k.startsWith("_")));
@@ -181,7 +185,7 @@ describe("определение аккорда", () => {
       const midis = c.pads ? padsToMidi(c.pads) : c.midi;
       const got = identify(midis, c.root_pc);
       try {
-        expect(got).toEqual(c.out);
+        expect(got).toEqual(enIdentify(c.out));
       } catch {
         bad.push(JSON.stringify(c.pads ?? c.midi) + " " + c.root_pc);
       }
@@ -192,7 +196,7 @@ describe("определение аккорда", () => {
     expect(enrich(f.enrich_in)).toEqual(f.enrich_out);
   });
   it("интервалы, ступени, суффиксы, руты", () => {
-    for (const [n, want] of f.interval_name) expect(intervalName(n), String(n)).toBe(want);
+    for (const [n, want] of f.interval_name) expect(intervalName(n), String(n)).toBe(enInterval(want));
     for (const [n, want] of f.degree_from_root) expect(degreeFromRoot(n), String(n)).toBe(want);
     for (const [k, want] of f.suffix_of) expect(suffixOf(k), k).toBe(want);
     for (const [pc, m, want] of f.root_name) expect(rootName(pc, m)).toBe(want);

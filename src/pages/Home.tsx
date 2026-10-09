@@ -28,7 +28,7 @@ import {
 } from "../store/db";
 import { APP_CSS_HOME } from "../styles/app";
 import { HOME_CSS } from "../styles/css";
-import { ago, plural } from "../view/text";
+import { ago, count, plural } from "../view/text";
 import { Message } from "./Message";
 
 const EXAMPLE = "Bb Bbmaj7b5 Gm Gm6 Dsus2 Dm Csus4 C Am";
@@ -37,19 +37,19 @@ const EXAMPLE = "Bb Bbmaj7b5 Gm Gm6 Dsus2 Dm Csus4 C Am";
 
 /** Что получится из вставленного текста — одной строкой под полем. */
 function Summary({ a }: { a: InputAnalysis }) {
-  if (a.kind === "empty") return <span className="sum dim">Вставь последовательность аккордов или текст песни с аккордами.</span>;
+  if (a.kind === "empty") return <span className="sum dim">Paste a chord progression or song lyrics with chords.</span>;
   const unk = [...new Set(a.unknown.map((u) => u.sym))];
   const unkNote = unk.length ? (
     <span className="sum-unk">
       {" "}
-      · не распознаны: <b>{unk.join(", ")}</b>
+      · not recognized: <b>{unk.join(", ")}</b>
     </span>
   ) : null;
   if (a.kind === "progression") {
     const n = a.syms.length;
     return (
       <span className="sum">
-        последовательность: <b>{n}</b> {plural(n, "аккорд", "аккорда", "аккордов")}
+        progression: <b>{n}</b> {plural(n, "chord", "chords")}
         {unkNote}
       </span>
     );
@@ -57,14 +57,14 @@ function Summary({ a }: { a: InputAnalysis }) {
   const n = new Set(a.chain).size;
   return (
     <span className="sum">
-      текст с аккордами
+      lyrics with chords
       {a.sections ? (
         <>
-          : <b>{a.sections}</b> {plural(a.sections, "секция", "секции", "секций")}
+          : <b>{a.sections}</b> {plural(a.sections, "section", "sections")}
         </>
       ) : null}
-      , схем: <b>{n}</b>
-      {a.allChords ? " (под текстом аккордов нет — схемы по проигрышам)" : ""}
+      , diagrams: <b>{n}</b>
+      {a.allChords ? " (no chords under the lyrics — diagrams from instrumental parts)" : ""}
       {unkNote}
     </span>
   );
@@ -72,13 +72,13 @@ function Summary({ a }: { a: InputAnalysis }) {
 
 /** Почему разобрать нельзя — или пустая строка, если можно. */
 function blocker(a: InputAnalysis): string {
-  if (a.kind === "empty") return "пусто";
+  if (a.kind === "empty") return "nothing to read";
   if (a.kind === "progression") {
-    if (a.unknown.length) return "в последовательности есть нераспознанные аккорды — поправь их";
-    if (!a.syms.length) return "ни одного аккорда";
+    if (a.unknown.length) return "the progression has unrecognized chords — fix them first";
+    if (!a.syms.length) return "no chords";
     return "";
   }
-  return a.chain.length ? "" : "не нашёл ни одного аккорда";
+  return a.chain.length ? "" : "no chords found";
 }
 
 /** Первая строка текста — название по умолчанию, чтобы плитки не были одинаковыми. */
@@ -92,7 +92,7 @@ function defaultTitle(a: InputAnalysis): string {
           return t.length > 40 ? t.slice(0, 39) + "…" : t;
         }
   }
-  return "Песня";
+  return "Song";
 }
 
 export function Editor({ initial }: { initial?: Analysis }) {
@@ -148,7 +148,7 @@ export function Editor({ initial }: { initial?: Analysis }) {
         value={text}
         spellCheck={false}
         placeholder={
-          "Bb Gm Dm C\n\nили текст песни — аккорды над строками:\n\n[Verse 1]\nAm                F\nВечер тихо ходит по крыше\nC                     G\nВетер пишет письма воде"
+          "Bb Gm Dm C\n\nor song lyrics with chords above the lines:\n\n[Verse 1]\nAm                F\nEvening walks across the rooftops\nC                     G\nWind is writing letters to the sea"
         }
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
@@ -158,7 +158,7 @@ export function Editor({ initial }: { initial?: Analysis }) {
       <div className="erow">
         <input
           type="text"
-          placeholder="название"
+          placeholder="title"
           value={title}
           onChange={(e) => {
             touched.current.title = true;
@@ -167,7 +167,7 @@ export function Editor({ initial }: { initial?: Analysis }) {
         />
         <input
           type="text"
-          placeholder="исполнитель"
+          placeholder="artist"
           value={artist}
           onChange={(e) => {
             touched.current.artist = true;
@@ -175,7 +175,7 @@ export function Editor({ initial }: { initial?: Analysis }) {
           }}
         />
         <button className="pri" disabled={!!block || busy} onClick={submit} title="Ctrl/⌘ + Enter">
-          {initial ? "Сохранить" : "Разобрать"}
+          {initial ? "Save" : "Create chart"}
         </button>
         {!initial ? (
           <button
@@ -184,7 +184,7 @@ export function Editor({ initial }: { initial?: Analysis }) {
               touched.current.title = false;
             }}
           >
-            вставить пример
+            insert example
           </button>
         ) : null}
       </div>
@@ -193,27 +193,28 @@ export function Editor({ initial }: { initial?: Analysis }) {
         {err ? <span className="st on err"> {err}</span> : null}
       </div>
       <details className="howto">
-        <summary>Как писать</summary>
+        <summary>Format help</summary>
         <p>
-          <b>Последовательность</b> — аккорды через пробел, запятую, <code>|</code> или <code>-&gt;</code>:{" "}
-          <code>Bb | Gm -&gt; A, Dm</code>. Получится лента схем, аппликатуры подобраны сразу для всей цепочки.
+          <b>Progression</b> — chords separated by spaces, commas, <code>|</code> or <code>-&gt;</code>:{" "}
+          <code>Bb | Gm -&gt; A, Dm</code>. You get a strip of diagrams, with voicings chosen for the whole chain at
+          once.
         </p>
         <p>
-          <b>Песня</b> — «аккорды над текстом», как на любом сайте с подборами: строка аккордов, под ней строка текста,
-          аккорд встаёт над своим слогом. Копипаст с ultimate-guitar или amdm можно вставлять как есть: секции{" "}
-          <code>[Verse 1]</code> и <code>Припев:</code>, пометки в скобках, <code>x2</code>, <code>N.C.</code>, звёздочки
-          и тактовые черты уберутся сами, <code>H</code> прочитается как <code>B</code>. Схемы строятся по аккордам,
-          которые звучат под текстом; интро и проигрыши остаются в тексте.
+          <b>Song</b> — &ldquo;chords over lyrics&rdquo;, like on any chords site: a line of chords, a line of lyrics
+          under it, and each chord sits over its syllable. Paste from ultimate-guitar or similar sites as is: sections
+          like <code>[Verse 1]</code> or <code>Chorus:</code>, notes in brackets, <code>x2</code>, <code>N.C.</code>,
+          asterisks and bar lines are cleaned up automatically, and <code>H</code> is read as <code>B</code>. Diagrams
+          are built for the chords played under the lyrics; intros and interludes stay in the text.
         </p>
         <p>
-          Шапка по желанию: <code>@title:</code>, <code>@artist:</code>, <code>@key:</code>, <code>@bpm:</code>,{" "}
-          <code>@capo:</code>, <code>@source:</code>. Строка, начатая с <code>.</code>, — точно аккорды, с{" "}
-          <code>|</code> — точно текст.
+          Optional header: <code>@title:</code>, <code>@artist:</code>, <code>@key:</code>, <code>@bpm:</code>,{" "}
+          <code>@capo:</code>, <code>@source:</code>. A line starting with <code>.</code> is always chords, one starting
+          with <code>|</code> is always lyrics.
         </p>
         <p>
-          <b>Регистр значим</b>: <code>CM7</code> — большой мажорный, <code>Cm7</code> — малый минорный. Слэш-бас —{" "}
-          <code>Am/C</code>, мажор с пониженной квинтой — <code>C(b5)</code> (голое <code>Cb5</code> — это квинта от Cb).
-          Понимаются, например: <code>C Cm Cdim Caug Csus2 Csus4 C5 C6 Cm6 C6/9 Cmaj7 Cm7 C7 CmMaj7 Cm7b5 Cdim7 Cadd9
+          <b>Case matters</b>: <code>CM7</code> is major seventh, <code>Cm7</code> is minor seventh. Slash bass —{" "}
+          <code>Am/C</code>; major flat five — <code>C(b5)</code> (a bare <code>Cb5</code> is a power chord on Cb).
+          Understood, for example: <code>C Cm Cdim Caug Csus2 Csus4 C5 C6 Cm6 C6/9 Cmaj7 Cm7 C7 CmMaj7 Cm7b5 Cdim7 Cadd9
           Cmaj9 Cm9 C9 C7b9 C7#9 C11 Cm11 C13 C7alt</code>.
         </p>
       </details>
@@ -244,11 +245,11 @@ function DelButton({ name, what, onDelete }: { name: string; what: string; onDel
   return (
     <button
       className="x"
-      title="удалить"
+      title="delete"
       onClick={async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!confirm(`Удалить ${what} «${name}»?`)) return;
+        if (!confirm(`Delete ${what} "${name}"?`)) return;
         await onDelete();
       }}
     >
@@ -261,7 +262,7 @@ function Tiles({ analyses, picks, reload }: { analyses: Analysis[]; picks: Pick[
   return (
     <>
       <h2>
-        Разборы <span>{analyses.length}</span>
+        Charts <span>{analyses.length}</span>
       </h2>
       {analyses.length ? (
         <div className="tiles">
@@ -269,23 +270,23 @@ function Tiles({ analyses, picks, reload }: { analyses: Analysis[]; picks: Pick[
             const n = it.syms.length;
             let sub = it.artist;
             if (it.kind === "progression") sub = (sub ? sub + " · " : "") + it.syms.slice(0, 9).join(" · ") + (n > 9 ? " …" : "");
-            else if (n) sub = (sub ? sub + " · " : "") + `${n} ${plural(n, "схема", "схемы", "схем")}`;
+            else if (n) sub = (sub ? sub + " · " : "") + count(n, "diagram", "diagrams");
             return (
               <Link className="card" to={`/a/${it.id}`} key={it.id}>
                 <b>{it.title}</b>
                 <i>{sub}</i>
                 <em>{ago(it.updated)}</em>
-                <DelButton name={it.title} what="разбор" onDelete={() => deleteAnalysis(it.id).then(reload)} />
+                <DelButton name={it.title} what="chart" onDelete={() => deleteAnalysis(it.id).then(reload)} />
               </Link>
             );
           })}
         </div>
       ) : (
-        <div className="empty">Пока пусто. Вставь аккорды или текст песни в поле выше и нажми «Разобрать».</div>
+        <div className="empty">Nothing yet. Paste chords or lyrics into the box above and press “Create chart”.</div>
       )}
 
       <h2>
-        Подборы <span>{picks.length}</span>
+        Collections <span>{picks.length}</span>
       </h2>
       {picks.length ? (
         <div className="tiles">
@@ -299,20 +300,20 @@ function Tiles({ analyses, picks, reload }: { analyses: Analysis[]; picks: Pick[
                 <b>{it.name}</b>
                 <i>{syms.join(" · ") + (n > syms.length ? " …" : "")}</i>
                 <em>
-                  {n} {plural(n, "аккорд", "аккорда", "аккордов")} · {ago(it.updated)}
+                  {count(n, "chord", "chords")} · {ago(it.updated)}
                 </em>
-                <DelButton name={it.name} what="подбор" onDelete={() => deletePick(it.id).then(reload)} />
+                <DelButton name={it.name} what="collection" onDelete={() => deletePick(it.id).then(reload)} />
               </Link>
             );
           })}
           <Link className="card new" to="/find">
-            + новый подбор
+            + new collection
           </Link>
         </div>
       ) : (
         <div className="empty">
-          Пока пусто. <Link to="/find">Открыть страницу определения</Link> — накликать аккорд на сетке, добавить в
-          подбор и сохранить под именем.
+          Nothing yet. <Link to="/find">Open the chord finder</Link> — click a chord on the grid, add it to a collection
+          and save it under a name.
         </div>
       )}
     </>
@@ -343,7 +344,7 @@ function Storage({ reload }: { reload: () => void }) {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setMsg(`выгружено: ${data.analyses.length} разб., ${data.picks.length} подб.`);
+    setMsg(`exported: ${count(data.analyses.length, "chart", "charts")}, ${count(data.picks.length, "collection", "collections")}`);
   }
 
   async function doImport(e: ChangeEvent<HTMLInputElement>) {
@@ -352,32 +353,32 @@ function Storage({ reload }: { reload: () => void }) {
     if (!f) return;
     try {
       const r = await importAll(JSON.parse(await f.text()));
-      setMsg(`загружено: новых ${r.added}, обновлено ${r.updated}, пропущено ${r.skipped}`);
+      setMsg(`imported: ${r.added} new, ${r.updated} updated, ${r.skipped} skipped`);
       reload();
     } catch (err) {
-      setMsg(`не загрузилось: ${(err as Error).message}`);
+      setMsg(`import failed: ${(err as Error).message}`);
     }
   }
 
   let status: string;
-  if (mode === "memory") status = "Хранилище браузера недоступно — разборы живут только до закрытия вкладки.";
-  else if (pers === "persisted") status = "Разборы хранятся в этом браузере, постоянно.";
+  if (mode === "memory") status = "Browser storage is unavailable — charts only last until the tab is closed.";
+  else if (pers === "persisted") status = "Charts are stored in this browser, permanently.";
   else if (pers === "best-effort")
-    status = "Разборы хранятся в этом браузере. Если место на диске кончится, браузер может их очистить.";
-  else status = "Разборы хранятся в этом браузере.";
+    status = "Charts are stored in this browser. If the disk runs out of space, the browser may clear them.";
+  else status = "Charts are stored in this browser.";
 
   return (
     <section className="storage">
-      <h2>Хранилище</h2>
+      <h2>Storage</h2>
       <p>
-        {status} Сервера нет: на другом устройстве их не будет — для этого есть бэкап.
+        {status} There is no server: they won't be on your other devices — that's what the backup is for.
       </p>
       <div className="erow">
         {pers === "best-effort" && mode === "idb" ? (
-          <button onClick={() => requestPersist().then(setPers)}>попросить хранить постоянно</button>
+          <button onClick={() => requestPersist().then(setPers)}>ask to keep permanently</button>
         ) : null}
-        <button onClick={doExport}>выгрузить бэкап</button>
-        <button onClick={() => file.current?.click()}>загрузить бэкап</button>
+        <button onClick={doExport}>export backup</button>
+        <button onClick={() => file.current?.click()}>import backup</button>
         <input ref={file} type="file" accept="application/json,.json" hidden onChange={doImport} />
         {msg ? <span className="st on">{msg}</span> : null}
       </div>
@@ -388,24 +389,24 @@ function Storage({ reload }: { reload: () => void }) {
 // --------------------------------------------------------------- страницы --
 
 export function HomePage() {
-  useTitle("Аккорды на Push");
+  useTitle("Chords on Push");
   const { analyses, picks, err, reload } = useLists();
   return (
     <>
       <PageStyle css={HOME_CSS + APP_CSS_HOME} />
       <Header
-        title="Аккорды на Push"
+        title="Chords on Push"
         back={null}
         ctl={
           <Link className="btn" to="/find">
-            + новый подбор
+            + new collection
           </Link>
         }
       />
       <div className="wrap">
-        <h2>Новый разбор</h2>
+        <h2>New chart</h2>
         <Editor />
-        {err ? <div className="empty">Хранилище не ответило: {err}</div> : null}
+        {err ? <div className="empty">Storage didn't respond: {err}</div> : null}
         {analyses && picks ? <Tiles analyses={analyses} picks={picks} reload={reload} /> : null}
         <Storage reload={reload} />
       </div>
@@ -422,13 +423,13 @@ export function EditPage() {
       () => setRec(null),
     );
   }, [id]);
-  useTitle(rec ? `Правка: ${rec.title}` : "Правка");
-  if (rec === undefined) return <Message title="Открываю…" text="" loading />;
-  if (rec === null) return <Message title="Нет такого разбора" text="Может быть, он удалён или сохранён в другом браузере." />;
+  useTitle(rec ? `Edit: ${rec.title}` : "Edit");
+  if (rec === undefined) return <Message title="Opening…" text="" loading />;
+  if (rec === null) return <Message title="No such chart" text="It may have been deleted, or saved in another browser." />;
   return (
     <>
       <PageStyle css={HOME_CSS + APP_CSS_HOME} />
-      <Header title={`Правка: ${rec.title}`} back={`/a/${rec.id}`} backText="к разбору" />
+      <Header title={`Edit: ${rec.title}`} back={`/a/${rec.id}`} backText="back to chart" />
       <div className="wrap">
         <Editor initial={rec} />
       </div>

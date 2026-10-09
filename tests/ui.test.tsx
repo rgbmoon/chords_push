@@ -45,7 +45,7 @@ describe("живая схема", () => {
     const up = v.ghosts.find((p) => g.pc(p) === g.pc(bass) && g.midi(p) > Math.max(...v.notes))!;
     fireEvent.click(pad(card, up));
     expect(card.classList.contains("edited")).toBe(true);
-    expect(card.querySelector(".vlab")!.textContent).toBe("1-е обращение");
+    expect(card.querySelector(".vlab")!.textContent).toBe("1st inversion");
     expect(classes(pad(card, up))).toContain("on");
     expect(onSave).toHaveBeenLastCalledWith("Am", expect.objectContaining({ extra: [] }));
     fireEvent.click(card.querySelector("button.rs")!);
@@ -105,7 +105,7 @@ describe("страница определения", () => {
     for (const p of [0, 1, 2, 3, 4, 5]) fireEvent.click(pad(big, p));
     expect(big.classList.contains("full")).toBe(true);
     fireEvent.click(pad(big, 6));
-    expect(document.querySelector("#warn")!.textContent).toContain("не больше 6 нот");
+    expect(document.querySelector("#warn")!.textContent).toContain("at most 6 notes");
     expect(classes(pad(big, 6))).not.toContain("on");
   });
 
@@ -113,20 +113,20 @@ describe("страница определения", () => {
     const router = app("/find");
     const big = await waitFor(() => document.querySelector(".pg.big") as HTMLElement);
     for (const p of [A, C, E, G]) fireEvent.click(pad(big, p));
-    fireEvent.click(screen.getByText("Добавить в подбор"));
-    fireEvent.click(screen.getByText("Очистить сетку"));
+    fireEvent.click(screen.getByText("Add to collection"));
+    fireEvent.click(screen.getByText("Clear grid"));
     for (const p of [C, E, G]) fireEvent.click(pad(big, p));
     fireEvent.keyDown(document, { key: "Enter" });
     expect(document.querySelectorAll("#strip > .pg").length).toBe(2);
-    expect(document.querySelector("#cnt")!.textContent).toBe("Подбор: 2 аккорда");
+    expect(document.querySelector("#cnt")!.textContent).toBe("Collection: 2 chords");
 
-    fireEvent.click(screen.getByText("Сохранить"));
-    expect(document.querySelector("#st")!.textContent).toBe("нужно название");
+    fireEvent.click(screen.getByText("Save"));
+    expect(document.querySelector("#st")!.textContent).toBe("name required");
     fireEvent.change(document.querySelector("#nm")!, { target: { value: "Проба пера" } });
     await act(async () => {
-      fireEvent.click(screen.getByText("Сохранить"));
+      fireEvent.click(screen.getByText("Save"));
     });
-    await waitFor(() => expect(document.querySelector("#st")!.textContent).toBe("сохранено"));
+    await waitFor(() => expect(document.querySelector("#st")!.textContent).toBe("saved"));
     const [saved] = await listPicks();
     expect(saved.name).toBe("Проба пера");
     expect(saved.chords.map((c) => c.sym)).toEqual(["Am7", "C"]);
@@ -164,9 +164,9 @@ describe("сквозной путь", () => {
         value: "[Verse]\nAm                F\nВечер тихо ходит по крыше\nC                     G\nВетер пишет письма воде\n",
       },
     });
-    expect(document.querySelector(".einfo")!.textContent).toContain("схем: 4");
+    expect(document.querySelector(".einfo")!.textContent).toContain("diagrams: 4");
     await act(async () => {
-      fireEvent.click(screen.getByText("Разобрать"));
+      fireEvent.click(screen.getByText("Create chart"));
     });
     await waitFor(() => expect(router.state.location.pathname).toMatch(/^\/a\//));
     const id = router.state.location.pathname.split("/")[2];
@@ -192,9 +192,9 @@ describe("сквозной путь", () => {
     const router = app("/");
     const ta = await waitFor(() => document.querySelector("textarea")!);
     fireEvent.change(ta, { target: { value: "Am Dm E7 Am" } });
-    expect(document.querySelector(".einfo")!.textContent).toContain("последовательность: 4 аккорда");
+    expect(document.querySelector(".einfo")!.textContent).toContain("progression: 4 chords");
     await act(async () => {
-      fireEvent.click(screen.getByText("Разобрать"));
+      fireEvent.click(screen.getByText("Create chart"));
     });
     await waitFor(() => expect(router.state.location.pathname).toMatch(/^\/a\//));
     await waitFor(() => expect(document.querySelectorAll(".cards .pg").length).toBe(4));
@@ -211,16 +211,16 @@ describe("сквозной путь", () => {
     app("/");
     const ta = await waitFor(() => document.querySelector("textarea")!);
     fireEvent.change(ta, { target: { value: "Am Cmaj7#9 F" } });
-    expect(document.querySelector(".einfo")!.textContent).toContain("не распознаны: Cmaj7#9");
-    expect((screen.getByText("Разобрать") as HTMLButtonElement).disabled).toBe(true);
+    expect(document.querySelector(".einfo")!.textContent).toContain("not recognized: Cmaj7#9");
+    expect((screen.getByText("Create chart") as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("нет такой страницы / нет такого разбора", async () => {
     app("/nope");
-    await waitFor(() => expect(document.querySelector("h1")!.textContent).toBe("Нет такой страницы"));
+    await waitFor(() => expect(document.querySelector("h1")!.textContent).toBe("Page not found"));
     cleanup();
     app("/a/missing");
-    await waitFor(() => expect(document.querySelector("h1")!.textContent).toBe("Нет такого разбора"));
+    await waitFor(() => expect(document.querySelector("h1")!.textContent).toBe("No such chart"));
   });
 });
 

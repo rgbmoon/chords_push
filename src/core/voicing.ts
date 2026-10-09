@@ -104,6 +104,13 @@ export interface PadMark {
 
 export type Overlay = Map<Pad, PadMark>;
 
+/** 1 -> "1st", 2 -> "2nd", 3 -> "3rd", 4 -> "4th". */
+export function ordinal(n: number): string {
+  const t = n % 100;
+  if (t >= 11 && t <= 13) return `${n}th`;
+  return `${n}${["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
+}
+
 export class Voicing {
   constructor(
     readonly spec: ChordSpec,
@@ -125,7 +132,7 @@ export class Voicing {
 
   describe(): string {
     let s = this.noteNames.join(" ");
-    if (this.inversion) s += `  ·  ${this.inversion}-е обращение`;
+    if (this.inversion) s += `  ·  ${ordinal(this.inversion)} inversion`;
     return s;
   }
 }
@@ -163,7 +170,7 @@ const toSpec = (c: ChordSpec | string): ChordSpec => (c instanceof ChordSpec ? c
 
 function rangeError(grid: Grid, spec: ChordSpec): Error {
   return new RangeError(
-    `аккорд ${spec.symbol} не помещается в диапазон сетки ` +
+    `chord ${spec.symbol} doesn't fit the grid range ` +
       `(${midiToName(grid.lowestMidi)}..${midiToName(grid.highestMidi)})`,
   );
 }

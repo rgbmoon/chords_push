@@ -7,7 +7,7 @@ export class ChordError extends Error {}
 
 export function chordIntervals(kind: string): number[] {
   const ent = CHORDS.get(kind);
-  if (!ent) throw new ChordError(`неизвестный тип аккорда: '${kind}'`);
+  if (!ent) throw new ChordError(`unknown chord type: '${kind}'`);
   return [...ent.intervals];
 }
 
@@ -92,7 +92,7 @@ const ROOT_RE = /^([A-Ga-g][#b♯♭]*)(.*)$/;
 
 function splitRoot(sym: string): [number, string, string] {
   const m = ROOT_RE.exec(sym);
-  if (!m) throw new ChordError(`не удалось прочитать тонику в '${sym}'`);
+  if (!m) throw new ChordError(`can't read the root in '${sym}'`);
   const written = m[1][0].toUpperCase() + m[1].slice(1).replaceAll("♯", "#").replaceAll("♭", "b");
   return [noteToPc(m[1]), m[2], written];
 }
@@ -105,7 +105,7 @@ function splitRoot(sym: string): [number, string, string] {
  */
 export function parseChordSymbol(sym: string): ChordSpec {
   const raw = pyStrip(sym);
-  if (!raw) throw new ChordError("пустой символ аккорда");
+  if (!raw) throw new ChordError("empty chord symbol");
   const clean = raw.replaceAll(" ", "");
 
   // скобки снимаем ТОЛЬКО с суффикса: в 'C(b5)' тоника — C, а не Cb
@@ -133,7 +133,7 @@ export function parseChordSymbol(sym: string): ChordSpec {
     }
   }
 
-  if (kind === undefined) throw new ChordError(`неизвестный аккорд '${raw}' (суффикс '${suffix}')`);
+  if (kind === undefined) throw new ChordError(`unknown chord '${raw}' (suffix '${suffix}')`);
   return new ChordSpec(raw, rootPc, kind, chordIntervals(kind), bassPc, written, bassWritten);
 }
 

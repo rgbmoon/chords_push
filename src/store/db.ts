@@ -104,7 +104,7 @@ function db(): Promise<Backend> {
   if (!bp) {
     bp = (async () => {
       try {
-        if (typeof indexedDB === "undefined") throw new Error("нет IndexedDB");
+        if (typeof indexedDB === "undefined") throw new Error("no IndexedDB");
         const d = await openDB<Schema>(DB_NAME, DB_VERSION, {
           upgrade(u) {
             u.createObjectStore("analyses", { keyPath: "id" }).createIndex("updated", "updated");
@@ -225,15 +225,15 @@ export interface AnalysisInput {
 /** Новый разбор или правка источника старого. Правки схем при этом сохраняются. */
 export async function saveAnalysis(input: AnalysisInput): Promise<Analysis> {
   const source = String(input.source);
-  if (!source.trim()) throw new StoreError("пустой источник");
-  if (source.length > MAX_SOURCE) throw new StoreError("слишком длинный текст");
+  if (!source.trim()) throw new StoreError("empty source");
+  if (source.length > MAX_SOURCE) throw new StoreError("text is too long");
   const d = await db();
   const old = input.id ? await d.get("analyses", input.id) : undefined;
   const now = Date.now();
   const rec: Analysis = {
     id: old?.id ?? input.id ?? newId(),
     kind: input.kind,
-    title: String(input.title || "").trim().slice(0, 120) || "Без названия",
+    title: String(input.title || "").trim().slice(0, 120) || "Untitled",
     artist: String(input.artist || "").trim().slice(0, 120),
     source,
     state: old?.state ?? {},
@@ -249,7 +249,7 @@ export async function saveAnalysis(input: AnalysisInput): Promise<Analysis> {
 export async function saveAnalysisState(id: string, state: Record<string, Saved | null>): Promise<void> {
   const d = await db();
   const rec = await d.get("analyses", id);
-  if (!rec) throw new StoreError("нет такого разбора");
+  if (!rec) throw new StoreError("no such chart");
   rec.state = cleanState(state);
   await d.put("analyses", rec);
 }
@@ -271,9 +271,9 @@ export async function getPick(id: string): Promise<Pick | undefined> {
 
 export async function savePick(input: { id?: string | null; name: string; chords: unknown }): Promise<Pick> {
   const name = String(input.name || "").trim().slice(0, 80);
-  if (!name) throw new StoreError("нужно название");
+  if (!name) throw new StoreError("name required");
   const chords = cleanChords(input.chords);
-  if (!chords.length) throw new StoreError("подбор пуст");
+  if (!chords.length) throw new StoreError("collection is empty");
   const d = await db();
   const old = input.id ? await d.get("picks", input.id) : undefined;
   const now = Date.now();
@@ -341,7 +341,7 @@ function cleanAnalysis(raw: unknown): Analysis | null {
   return {
     id,
     kind: a.kind,
-    title: str(a.title, 120) || "Без названия",
+    title: str(a.title, 120) || "Untitled",
     artist: str(a.artist, 120),
     source,
     state: cleanState(a.state),
@@ -370,7 +370,7 @@ export interface ImportResult {
 /** Слияние по id: из двух версий одной записи побеждает более свежая. */
 export async function importAll(raw: unknown): Promise<ImportResult> {
   if (!raw || typeof raw !== "object" || (raw as { app?: unknown }).app !== "chords-push")
-    throw new StoreError("это не бэкап «Аккордов на Push»");
+    throw new StoreError("this is not a Chords on Push backup");
   const b = raw as { analyses?: unknown; picks?: unknown };
   const res: ImportResult = { added: 0, updated: 0, skipped: 0 };
   const d = await db();

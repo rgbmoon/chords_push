@@ -16,13 +16,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Grid } from "../core/grid";
 import { Candidate, enrich, identify, MAX_NOTES, padsToMidi } from "../core/identify";
 import { floorDiv } from "../core/py";
+import { ordinal } from "../core/voicing";
 import { Header, PageStyle, SplitLayout, useTitle } from "../components/Frame";
 import { PadRender, Pads } from "../components/Pads";
 import { getPick, savePick } from "../store/db";
 import { FIND_CSS, LAYOUT_CSS } from "../styles/css";
 import { padMidi as midi } from "../view/live";
 import { domOrder } from "../view/scheme";
-import { plural } from "../view/text";
+import { count } from "../view/text";
 import { Message } from "./Message";
 
 const GRID = new Grid();
@@ -119,7 +120,7 @@ function Degs({ pt }: { pt: ReturnType<typeof parts> }) {
   if (!pt.deg.length && !pt.edeg.length) return null;
   return (
     <>
-      ступени <b>{pt.deg.join(" · ")}</b>
+      degrees <b>{pt.deg.join(" · ")}</b>
       {pt.edeg.length ? (
         <>
           {" "}
@@ -174,8 +175,8 @@ export function FindPage() {
     };
   }, [id]);
 
-  if (loaded === "missing") return <Message title="Нет такого подбора" text="Может быть, он удалён или сохранён в другом браузере." />;
-  if (loaded === null) return <Message title="Открываю…" text="" loading />;
+  if (loaded === "missing") return <Message title="No such collection" text="It may have been deleted, or saved in another browser." />;
+  if (loaded === null) return <Message title="Opening…" text="" loading />;
   return <Finder key={loaded.seq} initial={loaded} onSaved={(rid) => (skip.current = rid)} />;
 }
 
@@ -202,7 +203,7 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
   const stripRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
-  useTitle(savedName ? `${savedName} — подбор` : "Определение аккорда");
+  useTitle(savedName ? `${savedName} — collection` : "Chord finder");
 
   /** Пересчитать разбор. Рут ЗАЛОЧЕН: заголовок берём только у аккорда от него. */
   function analyze(nextSel: number[], nextLock: number | null, prefer?: string) {
@@ -238,19 +239,19 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
   let sub: string;
   if (c) {
     sub = c.name;
-    if (c.inv) sub += ` · ${c.inv}-е обращение`;
-  } else if (!sel.length) sub = "кликай по пэдам — сетка сама скажет, что получилось";
+    if (c.inv) sub += ` · ${ordinal(c.inv)} inversion`;
+  } else if (!sel.length) sub = "click pads — the grid will tell you what you've got";
   else if (nNotes < 2) {
     // одна нота — это ещё не «аккорда нет», это заявленный рут
     sym = "—";
     symNone = true;
-    sub = `рут ${lockPc !== null ? PCNAME[lockPc] : ""} — добавляй ноты`;
-  } else if (cand.length) sub = `от ${lockPc !== null ? PCNAME[lockPc] : "этой ноты"} такого аккорда в таблице нет — но есть варианты ниже`;
-  else if (iv) sub = `интервал: ${iv}`;
-  else sub = "такого аккорда в таблице нет";
+    sub = `root ${lockPc !== null ? PCNAME[lockPc] : ""} — now add notes`;
+  } else if (cand.length) sub = `no chord from ${lockPc !== null ? PCNAME[lockPc] : "this note"} in the table — but there are options below`;
+  else if (iv) sub = `interval: ${iv}`;
+  else sub = "no such chord in the table";
 
   // лишние ноты и так видно фиолетовым в списке — тут только «чего не хватает»
-  const warn = hint || (c && c.missing.length ? `без ${c.missing.join(", ")}` : "");
+  const warn = hint || (c && c.missing.length ? `no ${c.missing.join(", ")}` : "");
 
   useEffect(() => {
     if (!hint) return;
@@ -277,7 +278,7 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
     if (j >= 0) next.splice(j, 1);
     else {
       if (distinctPcs(sel) >= MAX_NOTES) {
-        setHint(`в аккорде не больше ${MAX_NOTES} нот — сними лишнюю`);
+        setHint(`a chord has at most ${MAX_NOTES} notes — remove one first`);
         return;
       }
       next = [...next, i];
@@ -384,11 +385,11 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
     const nm = name.trim();
     if (!nm) {
       nameRef.current?.focus();
-      setStatus({ text: "нужно название", err: true, on: true });
+      setStatus({ text: "name required", err: true, on: true });
       return;
     }
     if (!items.length) {
-      setStatus({ text: "подбор пуст", err: true, on: true });
+      setStatus({ text: "collection is empty", err: true, on: true });
       return;
     }
     const wasId = pickId;
@@ -396,13 +397,13 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
       const rec = await savePick({ id: pickId, name: nm, chords: items });
       setPickId(rec.id);
       setSavedName(rec.name);
-      setStatus({ text: "сохранено", err: false, on: true });
+      setStatus({ text: "saved", err: false, on: true });
       if (rec.id !== wasId) {
         onSaved(rec.id);
         nav(`/find/${rec.id}`, { replace: true });
       }
     } catch (e) {
-      setStatus({ text: String((e as Error).message || "не сохранилось"), err: true, on: true });
+      setStatus({ text: String((e as Error).message || "not saved"), err: true, on: true });
     }
   }
 
@@ -415,14 +416,14 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
     <>
       <PageStyle css={LAYOUT_CSS + FIND_CSS} />
       <Header
-        title="Определение аккорда"
+        title="Chord finder"
         ctl={
           <>
             <input
               type="text"
               id="nm"
               ref={nameRef}
-              placeholder="название подбора"
+              placeholder="collection name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
@@ -430,7 +431,7 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
               }}
             />
             <button id="save" className="pri" onClick={save}>
-              Сохранить
+              Save
             </button>
             <span className={"st" + (status.on ? " on" : "") + (status.err ? " err" : "")} id="st">
               {status.text}
@@ -490,18 +491,18 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
               </div>
               <div className="acts">
                 <button id="add" className="pri" disabled={!sel.length} onClick={add}>
-                  Добавить в подбор
+                  Add to collection
                 </button>
                 <button id="clr" onClick={clear}>
-                  Очистить сетку
+                  Clear grid
                 </button>
               </div>
               <div className="hint">
-                Первый нажатый пэд &mdash; <b>рут</b>: от него строится аккорд, повторный клик по нему сбрасывает сетку.
-                Нот в аккорде не больше {MAX_NOTES}. Выбрал другое название из списка &mdash; рут стал его.
+                The first pad you press is the <b>root</b>: the chord is built from it, and clicking it again clears
+                the grid. At most {MAX_NOTES} notes per chord. Pick another name from the list and the root moves to it.
                 <br />
-                Enter &mdash; добавить в подбор, Esc &mdash; очистить. Клик по схеме справа возвращает её на сетку,
-                перетаскивание меняет порядок.
+                Enter &mdash; add to collection, Esc &mdash; clear. Click a diagram on the right to bring it back to the
+                grid, drag to reorder.
               </div>
             </div>
           </main>
@@ -510,18 +511,18 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
           <aside className="pane side">
             <div className="sidehead">
               <b id="cnt">
-                {items.length ? `Подбор: ${items.length} ${plural(items.length, "аккорд", "аккорда", "аккордов")}` : "Подбор пуст"}
+                {items.length ? `Collection: ${count(items.length, "chord", "chords")}` : "Collection is empty"}
               </b>
               <button
                 id="wipe"
                 disabled={!items.length}
                 onClick={() => {
-                  if (items.length && !confirm("Убрать все аккорды из подбора?")) return;
+                  if (items.length && !confirm("Remove all chords from the collection?")) return;
                   setItems([]);
                   setCur(-1);
                 }}
               >
-                убрать всё
+                clear all
               </button>
             </div>
             <div className="cards" id="strip" ref={stripRef} onDragOver={(e) => e.preventDefault()}>
@@ -554,7 +555,7 @@ function Finder({ initial, onSaved }: { initial: Loaded; onSaved: (id: string) =
                         </span>
                       </div>
                       <div className="pgf">
-                        <button className="del" title="убрать">
+                        <button className="del" title="remove">
                           &times;
                         </button>
                         <span className="pgm">

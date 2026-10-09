@@ -19,13 +19,13 @@ export class NoteError extends Error {}
 export function noteToPc(name: string | number): number {
   if (typeof name === "number") return mod(name, 12);
   const s = pyStrip(String(name));
-  if (!s) throw new NoteError("пустое имя ноты");
+  if (!s) throw new NoteError("empty note name");
   let pc = PC[s[0].toUpperCase()];
-  if (pc === undefined) throw new NoteError(`неизвестная нота: '${name}'`);
+  if (pc === undefined) throw new NoteError(`unknown note: '${name}'`);
   for (const ch of s.slice(1)) {
     if (ch === "#" || ch === "♯") pc += 1;
     else if (ch === "b" || ch === "♭") pc -= 1;
-    else throw new NoteError(`неизвестный знак альтерации в '${name}'`);
+    else throw new NoteError(`unknown accidental in '${name}'`);
   }
   return mod(pc, 12);
 }
@@ -47,7 +47,7 @@ export function midiToName(midi: number, flats = false, octave = true): string {
 export function scaleSteps(scale: string | readonly number[]): number[] {
   if (typeof scale !== "string") return [...new Set(scale.map((x) => mod(x, 12)))].sort((a, b) => a - b);
   const ent = SCALES.get(scale);
-  if (!ent) throw new Error(`неизвестная гамма: '${scale}'`);
+  if (!ent) throw new Error(`unknown scale: '${scale}'`);
   return [...ent.steps];
 }
 

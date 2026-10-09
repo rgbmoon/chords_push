@@ -95,7 +95,7 @@ export function pyFormat(tpl: string, vars: Record<string, string | number>): st
   return tpl.replace(/%(?:\((\w+)\)(?:\.(\d+))?([sdg])|%)/g, (m, name, prec, conv) => {
     if (m === "%%") return "%";
     const v = vars[name];
-    if (v === undefined) throw new Error(`нет значения для %(${name})`);
+    if (v === undefined) throw new Error(`no value for %(${name})`);
     if (conv === "s") return String(v);
     if (conv === "d") return String(Math.trunc(Number(v)));
     return fmtG(Number(v), prec === undefined ? 6 : Number(prec));

@@ -20,7 +20,7 @@ import { LAYOUT_CSS, SEQ_CSS, SONG_CSS } from "../styles/css";
 import { APP_CSS_ANALYSIS } from "../styles/app";
 import type { Saved } from "../view/live";
 import { schemeModel, SchemeModel } from "../view/scheme";
-import { fmtDate, plural } from "../view/text";
+import { count, fmtDate } from "../view/text";
 import { Message } from "./Message";
 
 export function AnalysisPage() {
@@ -39,9 +39,9 @@ export function AnalysisPage() {
     };
   }, [id]);
 
-  if (err) return <Message title="Не открылось" text={`Хранилище не ответило: ${err}`} />;
-  if (rec === undefined) return <Message title="Открываю…" text="" loading />;
-  if (rec === null) return <Message title="Нет такого разбора" text="Может быть, он удалён или сохранён в другом браузере." />;
+  if (err) return <Message title="Couldn't open" text={`Storage didn't respond: ${err}`} />;
+  if (rec === undefined) return <Message title="Opening…" text="" loading />;
+  if (rec === null) return <Message title="No such chart" text="It may have been deleted, or saved in another browser." />;
   return <AnalysisView rec={rec} />;
 }
 
@@ -100,16 +100,16 @@ function Toolbar({ rec }: { rec: Analysis }) {
   return (
     <>
       <Link className="btn" to={`/edit/${rec.id}`}>
-        править
+        edit
       </Link>
       <button
         onClick={async () => {
-          if (!confirm(`Удалить разбор «${rec.title}»?`)) return;
+          if (!confirm(`Delete chart "${rec.title}"?`)) return;
           await deleteAnalysis(rec.id);
           nav("/");
         }}
       >
-        удалить
+        delete
       </button>
     </>
   );
@@ -120,8 +120,8 @@ function Warnings({ unknown }: { unknown: readonly Unknown[] }) {
   const syms = [...new Set(unknown.map((u) => u.sym))];
   return (
     <p className="unk-note">
-      Не распознаны: <b>{syms.join(", ")}</b> — схем для них нет. Как писать аккорды, чтобы их узнавало, —
-      в подсказке на <Link to="/">главной</Link>.
+      Not recognized: <b>{syms.join(", ")}</b> — no diagrams for these. The format help on the{" "}
+      <Link to="/">home page</Link> lists the spellings it understands.
     </p>
   );
 }
@@ -132,14 +132,14 @@ function SaveNote({ failed }: { failed: boolean }) {
     storageMode().then(setMode);
   }, []);
   if (mode === "memory")
-    return <span className="st on err">хранилище недоступно — правки живут до закрытия вкладки</span>;
-  return failed ? <span className="st on err">правка не сохранилась</span> : null;
+    return <span className="st on err">storage unavailable — edits last until the tab is closed</span>;
+  return failed ? <span className="st on err">edit not saved</span> : null;
 }
 
 function AnalysisView({ rec }: { rec: Analysis }) {
   const a = useMemo(() => analyzeInput(rec.source), [rec.source]);
   if (a.kind === "empty")
-    return <Message title={rec.title} text="В источнике не нашлось ни одного аккорда." back={`/edit/${rec.id}`} backText="править источник" />;
+    return <Message title={rec.title} text="No chords found in the source." back={`/edit/${rec.id}`} backText="edit source" />;
   if (a.kind === "progression") return <ProgressionView rec={rec} a={a} />;
   return <SheetView rec={rec} a={a} />;
 }
@@ -156,7 +156,7 @@ function solve<T>(f: () => T): [T | null, string] {
 
 export function LineView({ line }: { line: Line }) {
   const c = (sym: string) => (
-    <span className={isChordSymbol(sym) ? "c" : "c unk"} title={isChordSymbol(sym) ? undefined : "не распознан — схемы нет"}>
+    <span className={isChordSymbol(sym) ? "c" : "c unk"} title={isChordSymbol(sym) ? undefined : "not recognized — no diagram"}>
       {sym}
     </span>
   );
@@ -190,9 +190,9 @@ const SIZES_LYRIC = { S: "15px", M: "clamp(16px,1.4vw,21px)", L: "24px" } as con
 function SheetView({ rec, a }: { rec: Analysis; a: Extract<InputAnalysis, { kind: "sheet" }> }) {
   const { onSave, failed } = useStateSaver(rec);
   const meta = a.meta;
-  const title = rec.title || meta.title || "Песня";
+  const title = rec.title || meta.title || "Song";
   const artist = rec.artist || meta.artist || "";
-  useTitle(`${title} — текст и схемы для Push`);
+  useTitle(`${title} — lyrics and Push diagrams`);
 
   const [models, err] = useMemo(
     () =>
@@ -204,8 +204,8 @@ function SheetView({ rec, a }: { rec: Analysis; a: Extract<InputAnalysis, { kind
   );
 
   const chips: ReactNode[] = [];
-  if (meta.key) chips.push(<span key="k">тональность <b>{meta.key}</b></span>);
-  if (meta.capo) chips.push(<span key="c">каподастр <b>{meta.capo}</b></span>);
+  if (meta.key) chips.push(<span key="k">key <b>{meta.key}</b></span>);
+  if (meta.capo) chips.push(<span key="c">capo <b>{meta.capo}</b></span>);
   if (meta.bpm) chips.push(<span key="b"><b>{meta.bpm}</b> BPM</span>);
 
   const src = safeUrl(meta.source);
@@ -214,38 +214,40 @@ function SheetView({ rec, a }: { rec: Analysis; a: Extract<InputAnalysis, { kind
       <Legend items={LEGEND_SHORT} />
       <div className="facts">
         <span>
-          схемы: <b>{(models ?? []).map((m) => m.title).join(", ")}</b>
+          diagrams: <b>{(models ?? []).map((m) => m.title).join(", ")}</b>
         </span>
-        {a.skipped.length ? <span>без схем: {a.skipped.join(", ")}</span> : null}
+        {a.skipped.length ? <span>no diagrams: {a.skipped.join(", ")}</span> : null}
         {src ? (
           <span>
             <a href={src} target="_blank" rel="noopener noreferrer">
-              источник
+              source
             </a>
           </span>
         ) : null}
       </div>
       <Warnings unknown={a.unknown} />
-      Сетка Ableton Push, режим <b>Note / Chromatic</b>, раскладка <b>4ths</b>, нижний левый пэд — C1. Раскраска сетки
-      всегда одна: тоника&nbsp;C + гамма&nbsp;C&nbsp;major.
+      Ableton Push grid, <b>Note / Chromatic</b> mode, <b>4ths</b> layout, bottom-left pad is C1. The grid coloring
+      is always the same: tonic&nbsp;C + C&nbsp;major scale.
       <br />
-      Одна схема — один аккорд песни. Аппликатуру солвер выбирал не для аккорда в отдельности, а для всей цепочки
-      куплета, поэтому соседние аккорды делят пэды. Структура при этом не тронута — <b>рут всегда в басу</b>.
+      One diagram per chord of the song. The solver picked voicings not for each chord on its own but for the whole
+      verse chain, so neighboring chords share pads. The structure is untouched — <b>the root is always in the
+      bass</b>.
       <br />
-      Фигура всегда держится в {COMPACT.max_cols} колонках грида — такой аккорд берётся одной рукой, не разъезжаясь
-      вбок. Трезвучие уже четырёх колонок не бывает, sus-аккорды ложатся в три.
+      The shape always fits in {COMPACT.max_cols} grid columns — one hand takes the chord without stretching sideways.
+      A triad is never narrower than four columns; sus chords fit in three.
       <br />
-      Схема не приколочена. Клик по бледному пэду переносит на него голос той же ноты — так руками задаётся обращение,
-      и схема подписывает, какое получилось. Клик по любому другому пэду добавляет ноту не из аккорда, фиолетовым.
-      Изменённая схема помечается точкой у имени, <b>&#10227;</b> возвращает аппликатуру солвера. Правки сохраняются
-      сразу по клику — в этом браузере, и при следующем открытии схема встаёт так, как ты её оставил.
+      The diagram isn&apos;t fixed. Clicking a pale pad moves the voice of the same note there — that&apos;s how you
+      set an inversion by hand, and the diagram labels which one you got. Clicking any other pad adds a note outside
+      the chord, in purple. An edited diagram gets a dot next to its name, <b>&#10227;</b> restores the solver&apos;s
+      voicing. Edits are saved on every click — in this browser — and next time the diagram comes back the way you
+      left it.
       <br />
       {a.allChords
-        ? "Под текстом аккордов нет, поэтому схемы построены по всем аккордам, включая проигрыши."
-        : "Секции без текста (интро, проигрыши, аутро) оставлены в тексте, но схемы по ним не строятся."}
+        ? "There are no chords under the lyrics, so diagrams are built for all chords, including instrumental parts."
+        : "Sections without lyrics (intro, interludes, outro) stay in the text but get no diagrams."}
       <br />
-      Разбор создан {fmtDate(rec.created)}
-      {rec.updated !== rec.created ? `, изменён ${fmtDate(rec.updated)}` : ""}.
+      Chart created {fmtDate(rec.created)}
+      {rec.updated !== rec.created ? `, edited ${fmtDate(rec.updated)}` : ""}.
     </footer>
   );
 
@@ -260,7 +262,7 @@ function SheetView({ rec, a }: { rec: Analysis; a: Extract<InputAnalysis, { kind
           <>
             <SaveNote failed={failed} />
             <Sizer
-              label="текст:"
+              label="text:"
               vars={["--lyric"]}
               apply={(s) => document.documentElement.style.setProperty("--lyric", SIZES_LYRIC[s])}
             />
@@ -306,7 +308,7 @@ const SIZES_CARDS = { S: [320, 340], M: [400, 430], L: [540, 580] } as const;
 function ProgressionView({ rec, a }: { rec: Analysis; a: Extract<InputAnalysis, { kind: "progression" }> }) {
   const { onSave, failed } = useStateSaver(rec);
   const title = rec.title || a.meta.title || a.syms.slice(0, 4).join(" ");
-  useTitle(`${title} — схемы для Push`);
+  useTitle(`${title} — Push diagrams`);
 
   const [models, err] = useMemo(
     () =>
@@ -331,7 +333,7 @@ function ProgressionView({ rec, a }: { rec: Analysis; a: Extract<InputAnalysis, 
           <>
             <SaveNote failed={failed} />
             <Sizer
-              label="размер:"
+              label="size:"
               vars={["--card-min", "--card-max"]}
               apply={(s) => {
                 document.documentElement.style.setProperty("--card-min", SIZES_CARDS[s][0] + "px");
@@ -362,23 +364,23 @@ function ProgressionView({ rec, a }: { rec: Analysis; a: Extract<InputAnalysis, 
           ))}
         </div>
         <footer>
-          Сетка Ableton Push, режим <b>Note / Chromatic</b>, раскладка <b>4ths</b>, нижний левый пэд — C1. Раскраска
-          сетки всегда одна: тоника&nbsp;C + гамма&nbsp;C&nbsp;major.
+          Ableton Push grid, <b>Note / Chromatic</b> mode, <b>4ths</b> layout, bottom-left pad is C1. The grid
+          coloring is always the same: tonic&nbsp;C + C&nbsp;major scale.
           <br />
-          Аппликатуры подобраны сразу для всей цепочки: солвер минимизирует сдвиг руки по гриду, поэтому часть нот
-          переходит из аккорда в аккорд не сходя с пэда. Структуру аккорда он при этом не трогает —{" "}
-          <b>рут всегда в басу</b>, играет только октавой и выбором пэда.
+          Voicings are chosen for the whole chain at once: the solver minimizes hand movement across the grid, so some
+          notes stay on the same pad from chord to chord. It never touches the chord&apos;s structure —{" "}
+          <b>the root is always in the bass</b>; it only plays with the octave and the choice of pad.
           <br />
-          Фигура всегда держится в {COMPACT.max_cols} колонках грида — такой аккорд берётся одной рукой, не разъезжаясь
-          вбок.
+          The shape always fits in {COMPACT.max_cols} grid columns — one hand takes the chord without stretching
+          sideways.
           <br />
-          Схему можно переопределить руками: клик по бледному пэду переносит на него голос той же ноты — так задаётся
-          обращение, и схема подписывает, какое получилось. Клик по любому другому пэду добавляет ноту не из аккорда,
-          фиолетовым. Изменённая схема помечается точкой у имени, <b>&#10227;</b> возвращает аппликатуру солвера. Правки
-          сохраняются в этом браузере.
+          You can override a diagram by hand: clicking a pale pad moves the voice of the same note there — that&apos;s
+          how you set an inversion, and the diagram labels which one you got. Clicking any other pad adds a note outside
+          the chord, in purple. An edited diagram gets a dot next to its name, <b>&#10227;</b> restores the
+          solver&apos;s voicing. Edits are saved in this browser.
           <br />
-          {a.syms.length} {plural(a.syms.length, "аккорд", "аккорда", "аккордов")}. Разбор создан {fmtDate(rec.created)}
-          {rec.updated !== rec.created ? `, изменён ${fmtDate(rec.updated)}` : ""}.
+          {count(a.syms.length, "chord", "chords")}. Chart created {fmtDate(rec.created)}
+          {rec.updated !== rec.created ? `, edited ${fmtDate(rec.updated)}` : ""}.
         </footer>
       </div>
     </>

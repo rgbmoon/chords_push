@@ -81,7 +81,7 @@ export function rootName(pc: number, minorish = false): string {
  * хранится как 14, а не как 2.
  *
  * Таблица знает интервалы до терцдецимы (21 полутон), а сетка растягивается
- * на 42 — дальше называем составным: «малая септима через октаву».
+ * на 42 — дальше называем составным: «minor seventh plus an octave».
  */
 export function intervalName(semitones: number): string {
   const n = Math.abs(Math.trunc(semitones));
@@ -89,10 +89,10 @@ export function intervalName(semitones: number): string {
   if (ent) return ent.name;
   const octs = Math.floor(n / 12);
   const rest = n % 12;
-  if (rest === 0) return ({ 2: "две октавы", 3: "три октавы" } as Record<number, string>)[octs] ?? `${octs} октав`;
+  if (rest === 0) return ({ 2: "two octaves", 3: "three octaves" } as Record<number, string>)[octs] ?? `${octs} octaves`;
   const base = INTERVALS.get(rest);
   if (!base) return "";
-  return `${base.name} через ${octs === 1 ? "октаву" : `${octs} октавы`}`;
+  return `${base.name} plus ${octs === 1 ? "an octave" : `${octs} octaves`}`;
 }
 
 /** Подпись ступени по расстоянию от рута. Выше октавы — настоящая ступень

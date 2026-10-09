@@ -49,15 +49,15 @@ describe("разборы", () => {
     expect(await getAnalysis(a.id)).toBeUndefined();
   });
   it("пустой источник не сохраняется, пустое название подставляется", async () => {
-    await expect(saveAnalysis({ ...base, source: "   " })).rejects.toThrow("пустой источник");
-    expect((await saveAnalysis({ ...base, title: "  " })).title).toBe("Без названия");
+    await expect(saveAnalysis({ ...base, source: "   " })).rejects.toThrow("empty source");
+    expect((await saveAnalysis({ ...base, title: "  " })).title).toBe("Untitled");
   });
 });
 
 describe("подборы", () => {
   it("без имени и пустой — не сохраняется; повторное сохранение не плодит записи", async () => {
-    await expect(savePick({ name: "", chords: [{ pads: [1] }] })).rejects.toThrow("нужно название");
-    await expect(savePick({ name: "x", chords: [] })).rejects.toThrow("подбор пуст");
+    await expect(savePick({ name: "", chords: [{ pads: [1] }] })).rejects.toThrow("name required");
+    await expect(savePick({ name: "x", chords: [] })).rejects.toThrow("collection is empty");
     const p = await savePick({ name: "Проба пера", chords: [{ sym: "Am7", pads: [12, 17, 20, 25], root: 20, root_pc: 9, kind: "min7", degrees: { 0: "x" } }] });
     expect(p.chords[0]).toEqual({ sym: "Am7", pads: [12, 17, 20, 25], root: 20, root_pc: 9, kind: "min7" });
     const again = await savePick({ id: p.id, name: "Проба пера", chords: [{ sym: "C", pads: [0, 4, 9] }] });
@@ -90,6 +90,6 @@ describe("бэкап", () => {
       skipped: 3,
     });
     expect((await getAnalysis(a.id))!.title).toBe("Новое");
-    await expect(importAll({ hello: 1 })).rejects.toThrow("это не бэкап");
+    await expect(importAll({ hello: 1 })).rejects.toThrow("not a Chords on Push backup");
   });
 });

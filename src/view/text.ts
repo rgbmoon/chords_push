@@ -1,31 +1,28 @@
-/** Русские подписи: склонение и «сколько времени назад». */
+/** Подписи на экране: число с существительным и «сколько времени назад». */
 
-/** Русское склонение: 1 нота, 2-4 ноты, 5+ нот. */
-export function plural(n: number, one: string, few: string, many: string): string {
-  if (n % 10 === 1 && n % 100 !== 11) return one;
-  if ([2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100)) return few;
-  return many;
+/** 1 chord, 2 chords. */
+export function plural(n: number, one: string, many: string): string {
+  return n === 1 ? one : many;
 }
 
-/** «только что», «5 минут назад», «2 дня назад», дальше месяца — дата. */
+export const count = (n: number, one: string, many: string): string => `${n} ${plural(n, one, many)}`;
+
+/** «just now», «5 minutes ago», «2 days ago», дальше месяца — дата. */
 export function ago(ms: number, now = Date.now()): string {
   const d = Math.max(0, (now - ms) / 1000);
   if (d < 3600) {
     const n = Math.floor(d / 60);
-    return n < 1 ? "только что" : `${n} ${plural(n, "минуту", "минуты", "минут")} назад`;
+    return n < 1 ? "just now" : `${count(n, "minute", "minutes")} ago`;
   }
-  if (d < 86400) {
-    const n = Math.floor(d / 3600);
-    return `${n} ${plural(n, "час", "часа", "часов")} назад`;
-  }
+  if (d < 86400) return `${count(Math.floor(d / 3600), "hour", "hours")} ago`;
   const n = Math.floor(d / 86400);
-  if (n < 30) return `${n} ${plural(n, "день", "дня", "дней")} назад`;
+  if (n < 30) return `${count(n, "day", "days")} ago`;
   return fmtDate(ms);
 }
 
-/** 09.10.2026 — по местному времени, как писал Python (time.localtime). */
+/** 2026-10-09 — по местному времени: однозначно в любой стране. */
 export function fmtDate(ms: number): string {
   const t = new Date(ms);
   const p = (x: number) => String(x).padStart(2, "0");
-  return `${p(t.getDate())}.${p(t.getMonth() + 1)}.${t.getFullYear()}`;
+  return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())}`;
 }

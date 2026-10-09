@@ -336,12 +336,12 @@ describe("19. определение аккорда", () => {
   });
   it("интервалы — по реальному расстоянию", () => {
     expect(identify([]).candidates).toEqual([]);
-    expect(identify([60, 67]).interval).toBe("чистая квинта");
-    expect(identify([60, 61]).interval).toBe("малая секунда");
-    expect(identify([60, 73]).interval).toBe("малая нона");
-    expect(identify([60, 72]).interval).toBe("октава");
-    expect(identify([60, 85]).interval).toBe("малая секунда через 2 октавы");
-    expect(identify([60, 84]).interval).toBe("две октавы");
+    expect(identify([60, 67]).interval).toBe("perfect fifth");
+    expect(identify([60, 61]).interval).toBe("minor second");
+    expect(identify([60, 73]).interval).toBe("minor ninth");
+    expect(identify([60, 72]).interval).toBe("octave");
+    expect(identify([60, 85]).interval).toBe("minor second plus 2 octaves");
+    expect(identify([60, 84]).interval).toBe("two octaves");
     const pd = identify([36, 38], 0).pad_degrees;
     expect([pd["2"], pd["20"], pd["4"]]).toEqual(["2", "9", "3"]);
     expect(Object.keys(pd).length).toBe(64);

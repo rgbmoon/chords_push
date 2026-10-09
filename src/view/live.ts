@@ -13,7 +13,7 @@ import { BASE_MIDI, COLS, ROW_SEMITONES } from "../core/data";
 import { floorDiv } from "../core/py";
 import type { LiveData, PadCell } from "./scheme";
 
-export const INV = ["осн. вид", "1-е обращение", "2-е обращение", "3-е обращение", "4-е обращение", "5-е обращение"];
+export const INV = ["root position", "1st inversion", "2nd inversion", "3rd inversion", "4th inversion", "5th inversion"];
 
 export const padMidi = (p: number): number => BASE_MIDI + ROW_SEMITONES * Math.floor(p / COLS) + (p % COLS);
 const oct = (m: number): number => floorDiv(m, 12) - 2;

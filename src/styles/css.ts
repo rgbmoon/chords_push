@@ -363,7 +363,7 @@ export const FIND_CSS = `
   margin:0 0 9px;min-height:26px}
 .sidehead b{color:var(--fg);font-weight:600}
 .sidehead button{padding:3px 8px;font-size:12px}
-.cards:empty::after{content:"Собери аккорд на сетке слева и нажми «добавить в подбор» — схемы встанут сюда";
+.cards:empty::after{content:"Build a chord on the grid on the left and press “Add to collection” — diagrams will line up here";
   color:var(--dim);font-size:13px;line-height:1.5;display:block;max-width:280px}
 /* карточка подбора кликается целиком: клик возвращает аккорд на большую сетку,
    поэтому сами пэды тут события не ловят */

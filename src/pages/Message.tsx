@@ -9,7 +9,7 @@ export function Message({
   text,
   loading = false,
   back = "/",
-  backText = "на главную",
+  backText = "home",
 }: {
   title: string;
   text: string;
@@ -34,5 +34,5 @@ export function Message({
 }
 
 export function NotFound() {
-  return <Message title="Нет такой страницы" text="Ссылка неверная или устарела." />;
+  return <Message title="Page not found" text="The link is wrong or outdated." />;
 }

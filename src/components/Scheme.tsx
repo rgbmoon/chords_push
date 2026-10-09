@@ -44,11 +44,11 @@ export function Scheme({
         </div>
         <div className="pgf">
           <span className="vlab">{v.vlab}</span>
-          <button className="rs" title="вернуть аппликатуру солвера" onClick={() => update(initialState(model.data), true)}>
+          <button className="rs" title="restore the solver's voicing" onClick={() => update(initialState(model.data), true)}>
             &#10227;
           </button>
           <span className="pgm">
-            ступени <b>{v.degs.join(" · ")}</b>
+            degrees <b>{v.degs.join(" · ")}</b>
             {v.extraDegs.length ? (
               <>
                 {" "}
